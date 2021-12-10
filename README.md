@@ -1,2 +1,3 @@
 # EdWork
-Small serverless app for storing pictures of bikes
+Small serverless app for looking up Rowan's favourite coffee
+
