@@ -2,7 +2,6 @@ package org.edwork.goodcoffee.services;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.edwork.goodcoffee.exceptions.GoodCoffeeException;
 
 import javax.inject.Inject;
 

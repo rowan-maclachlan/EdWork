@@ -7,6 +7,10 @@ public class GoodCoffeeException extends RuntimeException {
         super(cause);
     }
 
+    public GoodCoffeeException(String message) {
+        super(message);
+    }
+
     public GoodCoffeeException(String message, Throwable cause)
     {
         super(message, cause);

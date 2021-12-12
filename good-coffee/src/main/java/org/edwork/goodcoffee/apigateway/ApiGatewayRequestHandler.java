@@ -5,44 +5,55 @@ import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import org.apache.http.HttpStatus;
+import org.edwork.goodcoffee.services.CoffeeValidator;
 import org.edwork.goodcoffee.services.LoggingService;
 import org.edwork.goodcoffee.services.MapperService;
 import org.jetbrains.annotations.NotNull;
 
-import javax.inject.Inject;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 public abstract class ApiGatewayRequestHandler<V, T> implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
 
-    @Inject
-    protected final LoggingService loggingService;
+    protected LoggingService loggingService;
 
-    @Inject
-    protected final MapperService mapperService;
+    protected MapperService mapperService;
 
+    protected CoffeeValidator validator;
 
-    public ApiGatewayRequestHandler(
-            LoggingService loggingService,
-            MapperService mapperService)
+    public ApiGatewayRequestHandler(LoggingService loggingService, MapperService mapperService, CoffeeValidator validator)
     {
         this.loggingService = loggingService;
         this.mapperService = mapperService;
+        this.validator = validator;
     }
 
     @Override
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent request, Context context) {
 
-        V v = null;
+        V body = null;
+        Map<String, String> queryParams = Objects.nonNull(request.getQueryStringParameters())
+                ? request.getQueryStringParameters() : new HashMap<>();
 
         try {
-            v = parse(request.getBody());
+            body = parse(request.getBody());
         } catch (Exception e) {
             loggingService.err("Failed to parse request body", e);
             return generateResponse(e.toString(), HttpStatus.SC_BAD_REQUEST);
         }
 
+        try {
+            validate(body, queryParams);
+        } catch (Exception e) {
+            loggingService.err("Failed to validate request", e);
+            return generateResponse(e.toString(), HttpStatus.SC_BAD_REQUEST);
+        }
+
+
         String responseBody = null;
         try {
-            T t = handle(v);
+            T t = handle(body, queryParams);
             responseBody = mapperService.toString(t);
         } catch (Exception e) {
             loggingService.err("Failed to handle request", e);
@@ -61,8 +72,9 @@ public abstract class ApiGatewayRequestHandler<V, T> implements RequestHandler<A
         return response;
     }
 
-    public abstract T handle(V v) throws Exception;
+    public abstract T handle(V v, Map<String, String> queryStringParameters) throws Exception;
 
     public abstract V parse(String body) throws Exception;
 
+    public abstract void validate(V v, Map<String, String> queryStringParameters);
 }

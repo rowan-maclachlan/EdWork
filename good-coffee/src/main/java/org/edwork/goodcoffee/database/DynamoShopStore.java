@@ -1,51 +1,43 @@
 package org.edwork.goodcoffee.database;
 
-import com.amazonaws.services.dynamodbv2.document.DynamoDB;
-import com.amazonaws.services.dynamodbv2.document.Item;
-import com.amazonaws.services.dynamodbv2.document.PutItemOutcome;
-import com.amazonaws.services.dynamodbv2.document.spec.GetItemSpec;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression;
+import com.amazonaws.services.dynamodbv2.model.ComparisonOperator;
+import com.amazonaws.services.dynamodbv2.model.Condition;
 import org.edwork.goodcoffee.database.model.CoffeeShop;
-import org.edwork.goodcoffee.services.MapperService;
 
 import javax.inject.Inject;
+import java.util.stream.Stream;
 
 public class DynamoShopStore implements ShopStore {
 
-    private static final String TABLE_NAME = "tableName";
+    private static final String RANGE_KEY_ATTRIBUTE_NAME = "rating";
+    private static final String GSI_PARTITION_KEY_NAME = "gsiPartition";
+
+    private final DynamoDBMapper dynamoDBMapper;
 
     @Inject
-    private final DynamoDB dynamoDB;
-    @Inject
-    private final MapperService mapperService;
-
-    public DynamoShopStore(DynamoDB dynamoDB, MapperService mapperService) {
-        this.dynamoDB = dynamoDB;
-        this.mapperService = mapperService;
+    public DynamoShopStore(DynamoDBMapper dynamoDBMapper) {
+        this.dynamoDBMapper = dynamoDBMapper;
     }
 
     @Override
-    public void addShop(CoffeeShop shop) throws Exception {
-        System.out.println("Creating new shop: " + mapperService.toString(shop));
-        Item newShopItem = new Item()
-                .withPrimaryKey("id", shop.getId())
-                .withString("name", shop.getName())
-                .withString("location", shop.getLocation())
-                .withNumber("rating", shop.getRating());
-
-        PutItemOutcome outcome = dynamoDB.getTable(TABLE_NAME).putItem(newShopItem);
-        System.out.println(mapperService.toString(outcome));
+    public void addShop(CoffeeShop shop) {
+        dynamoDBMapper.save(shop);
     }
 
     @Override
-    public CoffeeShop getShop(String id) throws Exception {
-        GetItemSpec spec = new GetItemSpec().withPrimaryKey("id", id);
+    public CoffeeShop getShop(String name) {
+        return dynamoDBMapper.load(CoffeeShop.class, name);
+    }
 
-        System.out.println("Getting shop " + id);
-        Item outcome = dynamoDB.getTable(TABLE_NAME).getItem(spec);
-        System.out.println("GetItem succeeded: " + outcome);
-
-        return mapperService.fromString(CoffeeShop.class, outcome.toJSON());
+    @Override
+    public Stream<CoffeeShop> getShops(int rating) {
+        CoffeeShop gsiHashKeyObj = new CoffeeShop();
+        DynamoDBQueryExpression<CoffeeShop> exp = new DynamoDBQueryExpression<>();
+        exp.withIndexName(GSI_PARTITION_KEY_NAME)
+                .withHashKeyValues(gsiHashKeyObj)
+                .withRangeKeyCondition(RANGE_KEY_ATTRIBUTE_NAME,  new Condition().withComparisonOperator(ComparisonOperator.GE));
+        return dynamoDBMapper.query(CoffeeShop.class, exp).stream();
     }
 }

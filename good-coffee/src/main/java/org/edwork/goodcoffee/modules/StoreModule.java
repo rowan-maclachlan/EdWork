@@ -3,33 +3,27 @@ package org.edwork.goodcoffee.modules;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
-import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 import dagger.Module;
 import dagger.Provides;
 import org.edwork.goodcoffee.database.DynamoShopStore;
 import org.edwork.goodcoffee.database.ShopStore;
-import org.edwork.goodcoffee.services.MapperService;
 
 import javax.inject.Singleton;
 
 @Module
 public class StoreModule {
 
-    @Provides
-    @Singleton
-    DynamoDB providesDynamoDB(final AmazonDynamoDB amazonDynamoDB) {
-        return new DynamoDB(amazonDynamoDB);
-    }
+    private StoreModule() {}
 
     @Provides
     @Singleton
-    DynamoDBMapper providesDynamoDBMapper(final AmazonDynamoDB amazonDynamoDB) {
+    public static DynamoDBMapper providesDynamoDBMapper(AmazonDynamoDB amazonDynamoDB) {
         return new DynamoDBMapper(amazonDynamoDB);
     }
 
     @Provides
     @Singleton
-    AmazonDynamoDB providesAmazonDynamoDB() {
+    public static AmazonDynamoDB providesAmazonDynamoDB() {
         return AmazonDynamoDBClientBuilder
                 .standard()
                 .build();
@@ -37,8 +31,8 @@ public class StoreModule {
 
     @Provides
     @Singleton
-    ShopStore providesShopStore(DynamoDB dynamoDB, MapperService mapperService) {
-        return new DynamoShopStore(dynamoDB, mapperService);
+    public static ShopStore providesShopStore(DynamoDBMapper dynamoDBMapper) {
+        return new DynamoShopStore(dynamoDBMapper);
     }
 
 }

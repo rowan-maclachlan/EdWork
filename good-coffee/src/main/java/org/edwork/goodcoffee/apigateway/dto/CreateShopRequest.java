@@ -1,7 +1,8 @@
 package org.edwork.goodcoffee.apigateway.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import org.edwork.goodcoffee.apigateway.ShopConstants;
+import org.edwork.goodcoffee.config.ShopConstants;
+import org.geojson.Point;
 
 import javax.validation.constraints.*;
 
@@ -12,8 +13,8 @@ public class CreateShopRequest {
 
     @Size(min=ShopConstants.SHOP_NAME_MIN_SIZE, max=ShopConstants.SHOP_NAME_MAX_SIZE)
     private String name;
-    @NotBlank
-    private String location;
+    @Size(min=2, max=2)
+    private Point location;
     @Min(ShopConstants.SHOP_RATING_MIN)
     @Max(ShopConstants.SHOP_RATING_MAX)
     private int rating;
@@ -28,11 +29,11 @@ public class CreateShopRequest {
         this.name = name;
     }
 
-    public String getLocation() {
+    public Point getLocation() {
         return location;
     }
 
-    public void setLocation(String location) {
+    public void setLocation(Point location) {
         this.location = location;
     }
 

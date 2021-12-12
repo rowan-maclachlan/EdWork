@@ -2,52 +2,44 @@ package org.edwork.goodcoffee.apigateway;
 
 import org.edwork.goodcoffee.apigateway.dto.CoffeeShopResponse;
 import org.edwork.goodcoffee.apigateway.dto.GetShopRequest;
+import org.edwork.goodcoffee.config.DaggerShopComponent;
 import org.edwork.goodcoffee.database.ShopStore;
-import org.edwork.goodcoffee.database.model.CoffeeShop;
 import org.edwork.goodcoffee.services.IdGenerator;
-import org.edwork.goodcoffee.services.LoggingService;
-import org.edwork.goodcoffee.services.MapperService;
 import org.modelmapper.ModelMapper;
 
 import javax.inject.Inject;
+import java.util.Map;
 
 public class GetShopRequestHandler extends ApiGatewayRequestHandler<GetShopRequest, CoffeeShopResponse> {
 
     @Inject
-    protected final ShopStore shopStore;
+    protected ShopStore shopStore;
     @Inject
-    protected final ModelMapper modelMapper;
-    @Inject
-    protected final IdGenerator idGenerator;
+    protected ModelMapper modelMapper;
 
-    public GetShopRequestHandler(
-            LoggingService loggingService,
-            ShopStore shopStore,
-            ModelMapper modelMapper,
-            MapperService mapperService,
-            IdGenerator idGenerator) {
-        super(loggingService, mapperService);
-
-        this.shopStore = shopStore;
-        this.modelMapper = modelMapper;
-        this.idGenerator = idGenerator;
+    public GetShopRequestHandler() {
+        super(DaggerShopComponent.create().loggingService(),
+                DaggerShopComponent.create().mapperService(),
+                DaggerShopComponent.create().validator());
+        this.shopStore = DaggerShopComponent.create().shopStore();
+        this.modelMapper = DaggerShopComponent.create().modelMapper();
+        loggingService.info("Created CreateShopRequestHandler");
     }
 
     @Override
-    public CoffeeShopResponse handle(GetShopRequest request) throws Exception {
-
-        CoffeeShop newShop = modelMapper.map(request, CoffeeShop.class);
-        String newShopId = idGenerator.generateId();
-        newShop.setId(newShopId);
-
-        shopStore.addShop(newShop);
-
-        return modelMapper.map(newShop, CoffeeShopResponse.class);
+    public CoffeeShopResponse handle(GetShopRequest request, Map<String, String> queryStringParameters) throws Exception {
+        loggingService.info("Handling request: " + mapperService.toString(request));
+        return modelMapper.map(shopStore.getShop(request.getName()), CoffeeShopResponse.class);
     }
 
     @Override
     public GetShopRequest parse(String body) throws Exception {
         return mapperService.fromString(GetShopRequest.class, body);
+    }
+
+    @Override
+    public void validate(GetShopRequest getShopRequest, Map<String, String> queryStringParameters) {
+        validator.validate(getShopRequest);
     }
 
 }
