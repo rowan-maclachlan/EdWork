@@ -23,7 +23,7 @@ The Good Coffee stack defines a simple REST app for tracking coffee joints.
 
 Use the app to find the best coffee near you.
 
-# Create a shop
+### Create Shops
 
 ```
 { 
@@ -33,6 +33,8 @@ Use the app to find the best coffee near you.
 ```
 
 The `location` type in the request must be a geojson point.  The `coordinates` are the shop's longitude and latitude in reference to EPSG:4326.
+
+### Find Shops
 
 To find the nearest coffee shop to your location, use the /coffeeshops endpoint and provide `lat` and `lon` query parameters in the URL.  To find the best coffee, 
 provide the `rating` query parameter to limit the shops returned to those with ratings greater than or equal to the value of the query parameter.
