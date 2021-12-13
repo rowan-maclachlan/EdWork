@@ -43,7 +43,8 @@ public class DynamoShopStore implements ShopStore {
         exp.withIndexName(GSI_INDEX_NAME)
                 .withHashKeyValues(new CoffeeShop())
                 .withRangeKeyCondition(RANGE_KEY_ATTRIBUTE_NAME, rangeKeyCondition)
-                .withConsistentRead(false);
+                .withConsistentRead(false)
+                .withScanIndexForward(false); // return descending sort
         loggingService.info(exp.toString());
         return dynamoDBMapper.query(CoffeeShop.class, exp).stream();
     }

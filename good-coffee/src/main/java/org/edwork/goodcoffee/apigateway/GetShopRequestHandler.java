@@ -3,10 +3,13 @@ package org.edwork.goodcoffee.apigateway;
 import org.edwork.goodcoffee.apigateway.dto.CoffeeShopResponse;
 import org.edwork.goodcoffee.config.DaggerShopComponent;
 import org.edwork.goodcoffee.database.ShopStore;
+import org.edwork.goodcoffee.database.model.CoffeeShop;
+import org.edwork.goodcoffee.exceptions.GoodCoffeeException;
 import org.modelmapper.ModelMapper;
 
 import javax.inject.Inject;
 import java.util.Map;
+import java.util.Objects;
 
 public class GetShopRequestHandler extends ApiGatewayRequestHandler<Void, CoffeeShopResponse> {
 
@@ -27,9 +30,14 @@ public class GetShopRequestHandler extends ApiGatewayRequestHandler<Void, Coffee
     @Override
     public CoffeeShopResponse handle(
             Void request, Map<String, String> queryStringParameters, Map<String, String> pathParameters) throws Exception {
-        String pathParameter = pathParameters.get(NAME_PATH_PARAM);
-        // TODO shopStore.getShop return value can be null, but modelMapper can't accept null
-        return modelMapper.map(shopStore.getShop(pathParameter), CoffeeShopResponse.class);
+        String name = pathParameters.get(NAME_PATH_PARAM);
+
+        CoffeeShop shop = shopStore.getShop(name);
+        if (Objects.isNull(shop)) {
+            throw new GoodCoffeeException("Resource not found");
+        }
+
+        return modelMapper.map(shop, CoffeeShopResponse.class);
     }
 
     @Override

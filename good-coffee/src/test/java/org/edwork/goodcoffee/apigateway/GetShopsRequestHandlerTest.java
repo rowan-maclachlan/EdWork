@@ -39,6 +39,35 @@ class GetShopsRequestHandlerTest {
     }
 
     @Test
+    void handleSortedShops() throws TransformException {
+
+        CoffeeShop worstShop = createCoffeeShop("id1", 2);
+        CoffeeShop middleShop = createCoffeeShop("id2", 3);
+        CoffeeShop bestShop = createCoffeeShop("id3", 4);
+        Mockito.when(shopStore.getShops(Mockito.any(Integer.class)))
+                .thenReturn(Stream.of(
+                        bestShop, middleShop, worstShop
+                ));
+
+        CoffeeShopResponse worstShopResponse = createShopResponse(2, "id1");
+        CoffeeShopResponse middleShopResponse = createShopResponse(3, "id2");
+        CoffeeShopResponse bestShopResponse = createShopResponse(4, "id3");
+        Mockito.when(modelMapper.map(worstShop, CoffeeShopResponse.class)).thenReturn(worstShopResponse);
+        Mockito.when(modelMapper.map(middleShop, CoffeeShopResponse.class)).thenReturn(middleShopResponse);
+        Mockito.when(modelMapper.map(bestShop, CoffeeShopResponse.class)).thenReturn(bestShopResponse);
+
+        Map<String, String> queryParams = new HashMap<>();
+        queryParams.put("rating", "1");
+
+        CoffeeShopsResponse response = requestHandler.handle(null, queryParams, null);
+
+        assertEquals(3, response.getCoffeeShops().size());
+        assertEquals(bestShop.getName(), response.getCoffeeShops().get(0).getName());
+        assertEquals(middleShop.getName(), response.getCoffeeShops().get(1).getName());
+        assertEquals(worstShop.getName(), response.getCoffeeShops().get(2).getName());
+    }
+
+    @Test
     void handleAFewShops() throws TransformException {
 
         CoffeeShop nearestShop = createCoffeeShop(createPoint(2, 2), "id1");
@@ -192,12 +221,26 @@ class GetShopsRequestHandlerTest {
         return new Point(x, y);
     }
 
+    private CoffeeShop createCoffeeShop(String name, int rating) {
+        CoffeeShop shop = new CoffeeShop();
+        shop.setRating(rating);
+        shop.setName(name);
+        return shop;
+    }
+
     private CoffeeShop createCoffeeShop(Point location, String name)
     {
         CoffeeShop shop = new CoffeeShop();
         shop.setLocation(location);
         shop.setName(name);
         return shop;
+    }
+
+    private CoffeeShopResponse createShopResponse(int rating, String name) {
+        CoffeeShopResponse response = new CoffeeShopResponse();
+        response.setRating(rating);
+        response.setName(name);
+        return response;
     }
 
     private CoffeeShopResponse createShopResponse(Point location, String name) {

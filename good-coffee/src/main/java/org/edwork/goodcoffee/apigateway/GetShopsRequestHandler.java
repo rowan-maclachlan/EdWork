@@ -67,8 +67,11 @@ public class GetShopsRequestHandler extends ApiGatewayRequestHandler<Void, Coffe
         Stream<CoffeeShop> coffeeShops = shopStore.getShops(rating);
         List<CoffeeShop> shops;
         if (sortShopByDistance) {
+            loggingService.info(
+                    "sorting by shop distance to " + queryStringParameters.get(QUERY_PARAM_LON) + ", " + queryStringParameters.get(QUERY_PARAM_LAT));
             shops = sortShopsByDistance(queryStringParameters, coffeeShops);
         } else {
+            loggingService.info("Sorting shops by rating");
             shops = coffeeShops.collect(Collectors.toList());
         }
 
