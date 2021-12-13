@@ -30,6 +30,7 @@ Use the app to find the best coffee near you.
   "name": "CuppaJoe",
   "location": { "type": "Point", "coordinates": [ -123.123, 48.9 ] },
   "rating": 5
+}
 ```
 
 The `location` type in the request must be a geojson point.  The `coordinates` are the shop's longitude and latitude in reference to EPSG:4326.
