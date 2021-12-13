@@ -1,0 +1,5 @@
+{
+    "name": "Revolver",
+    "location": { "type": "Point", "coordinates": [ -123.10949619422846, 49.28317392581477 ] },
+    "rating": 8
+}
