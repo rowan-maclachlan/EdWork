@@ -8,7 +8,9 @@ public interface ShopStore {
 
     void addShop(CoffeeShop shop);
 
-    CoffeeShop getShop(String id);
+    CoffeeShop getShop(String name);
 
     Stream<CoffeeShop> getShops(int rating);
+
+    void deleteShop(CoffeeShop shop);
 }

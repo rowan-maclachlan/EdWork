@@ -55,7 +55,8 @@ public class GetShopsRequestHandler extends ApiGatewayRequestHandler<Void, Coffe
     }
 
     @Override
-    public CoffeeShopsResponse handle(Void request, Map<String, String> queryStringParameters) throws TransformException {
+    public CoffeeShopsResponse handle(
+            Void request, Map<String, String> queryStringParameters, Map<String, String> pathParameters) throws TransformException {
 
         int rating = queryStringParameters.containsKey(QUERY_PARAM_RATING)
                 ? Integer.parseInt(queryStringParameters.get(QUERY_PARAM_RATING))
@@ -122,7 +123,7 @@ public class GetShopsRequestHandler extends ApiGatewayRequestHandler<Void, Coffe
     }
 
     @Override
-    public void validate(Void unused, Map<String, String> queryStringParameters) {
+    public void validate(Void unused, Map<String, String> queryStringParameters, Map<String, String> pathParameters) {
         boolean lat = queryStringParameters.containsKey(QUERY_PARAM_LAT);
         boolean lon = queryStringParameters.containsKey(QUERY_PARAM_LON);
         boolean xor = (lat && lon) || !(lat || lon);

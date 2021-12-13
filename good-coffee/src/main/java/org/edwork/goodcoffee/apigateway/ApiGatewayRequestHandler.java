@@ -31,10 +31,13 @@ public abstract class ApiGatewayRequestHandler<V, T> implements RequestHandler<A
 
     @Override
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent request, Context context) {
+        loggingService.info(request.toString());
 
         V body = null;
         Map<String, String> queryParams = Objects.nonNull(request.getQueryStringParameters())
                 ? request.getQueryStringParameters() : new HashMap<>();
+        Map<String, String> pathParams = Objects.nonNull(request.getPathParameters())
+                ? request.getPathParameters() : new HashMap<>();
 
         try {
             body = parse(request.getBody());
@@ -44,7 +47,7 @@ public abstract class ApiGatewayRequestHandler<V, T> implements RequestHandler<A
         }
 
         try {
-            validate(body, queryParams);
+            validate(body, queryParams, pathParams);
         } catch (Exception e) {
             loggingService.err("Failed to validate request", e);
             return generateResponse(e.toString(), HttpStatus.SC_BAD_REQUEST);
@@ -53,14 +56,18 @@ public abstract class ApiGatewayRequestHandler<V, T> implements RequestHandler<A
 
         String responseBody = null;
         try {
-            T t = handle(body, queryParams);
+            T t = handle(body, queryParams, pathParams);
             responseBody = mapperService.toString(t);
         } catch (Exception e) {
             loggingService.err("Failed to handle request", e);
             return generateResponse(e.toString(), HttpStatus.SC_INTERNAL_SERVER_ERROR);
         }
 
-        return generateResponse(responseBody, HttpStatus.SC_CREATED);
+        APIGatewayProxyResponseEvent response = generateResponse(responseBody, HttpStatus.SC_CREATED);
+
+        loggingService.info(response.toString());
+
+        return response;
 
     }
 
@@ -72,9 +79,9 @@ public abstract class ApiGatewayRequestHandler<V, T> implements RequestHandler<A
         return response;
     }
 
-    public abstract T handle(V v, Map<String, String> queryStringParameters) throws Exception;
+    public abstract T handle(V v, Map<String, String> queryStringParameters, Map<String, String> pathParameters) throws Exception;
 
     public abstract V parse(String body) throws Exception;
 
-    public abstract void validate(V v, Map<String, String> queryStringParameters);
+    public abstract void validate(V v, Map<String, String> queryStringParameters, Map<String, String> pathParameters);
 }

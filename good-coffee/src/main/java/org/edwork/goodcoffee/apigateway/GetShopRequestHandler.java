@@ -1,17 +1,16 @@
 package org.edwork.goodcoffee.apigateway;
 
 import org.edwork.goodcoffee.apigateway.dto.CoffeeShopResponse;
-import org.edwork.goodcoffee.apigateway.dto.GetShopRequest;
 import org.edwork.goodcoffee.config.DaggerShopComponent;
 import org.edwork.goodcoffee.database.ShopStore;
-import org.edwork.goodcoffee.services.IdGenerator;
 import org.modelmapper.ModelMapper;
 
 import javax.inject.Inject;
 import java.util.Map;
 
-public class GetShopRequestHandler extends ApiGatewayRequestHandler<GetShopRequest, CoffeeShopResponse> {
+public class GetShopRequestHandler extends ApiGatewayRequestHandler<Void, CoffeeShopResponse> {
 
+    private final static String NAME_PATH_PARAM = "name";
     @Inject
     protected ShopStore shopStore;
     @Inject
@@ -23,23 +22,25 @@ public class GetShopRequestHandler extends ApiGatewayRequestHandler<GetShopReque
                 DaggerShopComponent.create().validator());
         this.shopStore = DaggerShopComponent.create().shopStore();
         this.modelMapper = DaggerShopComponent.create().modelMapper();
-        loggingService.info("Created CreateShopRequestHandler");
     }
 
     @Override
-    public CoffeeShopResponse handle(GetShopRequest request, Map<String, String> queryStringParameters) throws Exception {
-        loggingService.info("Handling request: " + mapperService.toString(request));
-        return modelMapper.map(shopStore.getShop(request.getName()), CoffeeShopResponse.class);
+    public CoffeeShopResponse handle(
+            Void request, Map<String, String> queryStringParameters, Map<String, String> pathParameters) throws Exception {
+        String pathParameter = pathParameters.get(NAME_PATH_PARAM);
+        // TODO shopStore.getShop return value can be null, but modelMapper can't accept null
+        return modelMapper.map(shopStore.getShop(pathParameter), CoffeeShopResponse.class);
     }
 
     @Override
-    public GetShopRequest parse(String body) throws Exception {
-        return mapperService.fromString(GetShopRequest.class, body);
+    public Void parse(String body) throws Exception {
+        // pass
+        return null;
     }
 
     @Override
-    public void validate(GetShopRequest getShopRequest, Map<String, String> queryStringParameters) {
-        validator.validate(getShopRequest);
+    public void validate(Void getShopRequest, Map<String, String> queryStringParameters, Map<String, String> pathParameters) {
+        // pass
     }
 
 }

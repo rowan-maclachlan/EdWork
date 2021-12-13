@@ -60,7 +60,7 @@ class GetShopsRequestHandlerTest {
         coords.put("lat", "1.00");
         coords.put("lon", "1.00");
 
-        CoffeeShopsResponse response = requestHandler.handle(null, coords);
+        CoffeeShopsResponse response = requestHandler.handle(null, coords, null);
 
         assertEquals(3, response.getCoffeeShops().size());
         assertEquals(nearestShop.getName(), response.getCoffeeShops().get(0).getName());
@@ -91,12 +91,32 @@ class GetShopsRequestHandlerTest {
         coords.put("lat", "1.00");
         coords.put("lon", "-1.00");
 
-        CoffeeShopsResponse response = requestHandler.handle(null, coords);
+        CoffeeShopsResponse response = requestHandler.handle(null, coords, null);
 
         assertEquals(3, response.getCoffeeShops().size());
         assertEquals(nearestShop.getName(), response.getCoffeeShops().get(0).getName());
         assertEquals(middleShop.getName(), response.getCoffeeShops().get(1).getName());
         assertEquals(farShop.getName(), response.getCoffeeShops().get(2).getName());
+    }
+
+    @Test
+    void handleBigFloats() throws TransformException {
+
+        CoffeeShop shop = createCoffeeShop(createPoint(149.234234234, 75.123123123), "id1");
+        Mockito.when(shopStore.getShops(Mockito.any(Integer.class)))
+                .thenReturn(Stream.of(shop));
+
+        CoffeeShopResponse shopResponse = createShopResponse(createPoint(149.234234234, 75.123123123), "id1");
+        Mockito.when(modelMapper.map(shop, CoffeeShopResponse.class)).thenReturn(shopResponse);
+
+        Map<String, String> coords = new HashMap<>();
+        coords.put("lat", "12.234234234");
+        coords.put("lon", "-34.6546546");
+
+        CoffeeShopsResponse response = requestHandler.handle(null, coords, null);
+
+        assertEquals(1, response.getCoffeeShops().size());
+        assertEquals(shop.getName(), response.getCoffeeShops().get(0).getName());
     }
 
     @Test
@@ -116,7 +136,7 @@ class GetShopsRequestHandlerTest {
         coords.put("lat", "0");
         coords.put("lon", "-179");
 
-        CoffeeShopsResponse response = requestHandler.handle(null, coords);
+        CoffeeShopsResponse response = requestHandler.handle(null, coords, null);
 
         assertEquals(2, response.getCoffeeShops().size());
         assertEquals(crossMeridianShop.getName(), response.getCoffeeShops().get(0).getName());
@@ -131,7 +151,7 @@ class GetShopsRequestHandlerTest {
         coords.put("lon", "1.00");
         Mockito.when(shopStore.getShops(Mockito.any(Integer.class)))
                 .thenReturn(Stream.empty());
-        CoffeeShopsResponse response = requestHandler.handle(null, coords);
+        CoffeeShopsResponse response = requestHandler.handle(null, coords, null);
 
         assertEquals(0, response.getCoffeeShops().size());
     }
@@ -141,12 +161,12 @@ class GetShopsRequestHandlerTest {
         Map<String, String> queryParams = new HashMap<>();
         queryParams.put("lat", "5.0");
         queryParams.put("lon", "5.0");
-        requestHandler.validate(null, queryParams);
+        requestHandler.validate(null, queryParams, null);
     }
 
     @Test
     void handleValidationNeitherLatAndLon() {
-        requestHandler.validate(null, new HashMap<>());
+        requestHandler.validate(null, new HashMap<>(), null);
     }
 
     @Test
@@ -155,7 +175,7 @@ class GetShopsRequestHandlerTest {
         queryParams.put("lat", "5.0");
 
         Exception expected = assertThrows(GoodCoffeeException.class,
-                () -> requestHandler.validate(null, queryParams));
+                () -> requestHandler.validate(null, queryParams, null));
     }
 
     @Test

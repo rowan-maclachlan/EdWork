@@ -66,9 +66,18 @@ public class GoodCoffeeStack extends Stack {
                 .handler("org.edwork.goodcoffee.apigateway.GetShopRequestHandler::handleRequest")
                 .build();
 
+        final Function deleteShopRequestHandler = Function.Builder.create(this, "delete-shop-request-handler")
+                .runtime(Runtime.JAVA_11)
+                .code(Code.fromAsset("target/good-coffee-0.1.jar"))
+                .timeout(Duration.seconds(15))
+                .memorySize(256)
+                .handler("org.edwork.goodcoffee.apigateway.DeleteShopRequestHandler::handleRequest")
+                .build();
+
         dynamoDbTable.grantFullAccess(getShopRequestHandler);
         dynamoDbTable.grantFullAccess(getShopsRequestHandler);
         dynamoDbTable.grantFullAccess(createShopRequestHandler);
+        dynamoDbTable.grantFullAccess(deleteShopRequestHandler);
 
         RestApi api = RestApi.Builder.create(this, "good-coffee-API")
                 .restApiName("GoodCoffeeRestApi")
@@ -88,6 +97,9 @@ public class GoodCoffeeStack extends Stack {
         Resource coffeeShop = coffeeShops.addResource("{name}");
         LambdaIntegration getCoffeeIntegration =
                 LambdaIntegration.Builder.create(getShopRequestHandler).build();
+        LambdaIntegration deleteCoffeeIntegration =
+                LambdaIntegration.Builder.create(deleteShopRequestHandler).build();
         coffeeShop.addMethod("GET", getCoffeeIntegration);
+        coffeeShop.addMethod("DELETE", deleteCoffeeIntegration);
     }
 }

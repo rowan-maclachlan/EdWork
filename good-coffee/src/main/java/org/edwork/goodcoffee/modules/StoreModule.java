@@ -7,6 +7,7 @@ import dagger.Module;
 import dagger.Provides;
 import org.edwork.goodcoffee.database.DynamoShopStore;
 import org.edwork.goodcoffee.database.ShopStore;
+import org.edwork.goodcoffee.services.LoggingService;
 
 import javax.inject.Singleton;
 
@@ -31,8 +32,8 @@ public class StoreModule {
 
     @Provides
     @Singleton
-    public static ShopStore providesShopStore(DynamoDBMapper dynamoDBMapper) {
-        return new DynamoShopStore(dynamoDBMapper);
+    public static ShopStore providesShopStore(DynamoDBMapper dynamoDBMapper, LoggingService loggingService) {
+        return new DynamoShopStore(dynamoDBMapper, loggingService);
     }
 
 }

@@ -109,7 +109,8 @@ class ApiGatewayRequestHandlerTest {
         }
 
         @Override
-        public CoffeeShopResponse handle(CreateShopRequest s, Map<String, String> queryStringParameters) throws Exception {
+        public CoffeeShopResponse handle(
+                CreateShopRequest s, Map<String, String> queryStringParameters, Map<String, String> pathParameters) {
             return modelMapper.map(shopStore.getShop(s.getName()), CoffeeShopResponse.class);
         }
 
@@ -119,7 +120,8 @@ class ApiGatewayRequestHandlerTest {
         }
 
         @Override
-        public void validate(CreateShopRequest request, Map<String, String> queryStringParameters) {
+        public void validate(
+                CreateShopRequest request, Map<String, String> queryStringParameters, Map<String, String> pathParameters) {
             validator.validate(request);
         }
     }

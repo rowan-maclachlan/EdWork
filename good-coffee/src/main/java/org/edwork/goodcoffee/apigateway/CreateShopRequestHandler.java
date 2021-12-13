@@ -41,7 +41,8 @@ public class CreateShopRequestHandler extends ApiGatewayRequestHandler<CreateSho
     }
 
     @Override
-    public CoffeeShopResponse handle(CreateShopRequest request, Map<String, String> queryStringParameters) throws Exception {
+    public CoffeeShopResponse handle(
+            CreateShopRequest request, Map<String, String> queryStringParameters, Map<String, String> pathParameters) throws Exception {
         loggingService.info("Handling request: " + mapperService.toString(request));
 
         CoffeeShop newShop = modelMapper.map(request, CoffeeShop.class);
@@ -58,7 +59,7 @@ public class CreateShopRequestHandler extends ApiGatewayRequestHandler<CreateSho
     }
 
     @Override
-    public void validate(CreateShopRequest request, Map<String, String> queryStringParameters) {
+    public void validate(CreateShopRequest request, Map<String, String> queryStringParameters, Map<String, String> pathParameters) {
         validator.validate(request);
     }
 
